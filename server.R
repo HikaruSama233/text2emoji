@@ -2,17 +2,13 @@ library(shiny)
 library(NLP)
 noDict = c("no", "never", "little", "few", "nobody", "nothing",
            "none", "seldom", "hardly", "nor", "t", "not")
-emoDict = read.table("E:/GitHub/text2emoji/emotionDict.txt", header = TRUE)
-emoji = read.table("E:/GitHub/text2emoji/emoji.txt", header = TRUE, 
+emoDict = read.table("emotionDict.txt", header = TRUE)
+emoji = read.table("emoji.txt", header = TRUE, 
                      stringsAsFactors = FALSE, sep = "\t")
 shinyServer(function(input, output){
   output$emoji_out = renderText({
     testText = input$text_in
-    if (length(testText) == 0) {
-      testText = "absurd"
-    }
     testText = String(tolower(testText))
-    print(testText)
     text_sp = wordpunct_tokenizer(testText)
     textArr = testText[text_sp]
     if(sum(textArr %in% noDict)%%2 == 0) {
@@ -40,7 +36,6 @@ shinyServer(function(input, output){
     emoWeight = emoDict[emoDict$word %in% textArr,]
     
     weighted = colSums(emoWeight[,-1]) + posWeight + sigWeight + baseWeight
-    print(weighted)
     weighted = ifelse(weighted > 0, 1, 0)
     subEmoji = emoji[(emoji$positive == weighted["positive"]) & (emoji$negative == weighted["negative"]),]
     if (nrow(subEmoji) == 0) {
